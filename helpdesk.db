@@ -1,0 +1,123 @@
+create database helpdesk;
+
+use helpdesk;
+
+
+create table usuarios (
+	id int auto_increment primary key,
+    nome varchar(100) not null,
+    email varchar(120) not null unique,
+    senha varchar(255) not null,
+    tipo_usuario enum (
+		'admin',
+        'tecnico',
+        'usuario'
+	) not null,
+    
+    ativo boolean default true,
+    criado_em timestamp default current_timestamp,
+    atualizado_em timestamp default current_timestamp on update current_timestamp
+);
+
+
+
+create table chamados (
+		id int auto_increment primary key,
+        titulo varchar(150) not null,
+        descricao text not null,
+        prioridade enum (
+			'BAIXA',
+            'MEDIA',
+            'ALTA',
+            'URGENTE'
+		) not null,
+	   status_chamado enum(
+			'ABERTO',
+            'EM ANDAMENTO',
+            'AGUARDANDO',
+            'FINALIZADO',
+            'CANCELADO'
+		) default 'ABERTO',
+        
+	   categoria varchar(50),
+       usuario_id int not null,
+       tecnico_id int not null,
+       criado_em timestamp default current_timestamp,
+       atualizado_em timestamp default current_timestamp on update current_timestamp,
+       
+       constraint fk_chamado_usuario
+			foreign key (usuario_id)
+            references usuarios(id),
+		
+	   constraint fk_chamado_tecnico
+			foreign key (tecnico_id)
+            references usuarios(Id)
+		);
+        
+create table respostas (
+	id int auto_increment primary key,
+    chamado_id int not null,
+    usuario_id int not null,
+    mensagem text not null,
+    criado_em timestamp default current_timestamp,
+    
+    constraint fk_resposta_chamado
+		foreign key (chamado_id)
+        references chamados(id),
+	
+    constraint fk_resposta_usuario
+		foreign key (usuario_id)
+        references usuarios(id)
+);
+
+
+create table anexos (
+	id int auto_increment primary key,
+    chamado_id int not null,
+    caminho_arquivo text not null,
+    criado_em timestamp default current_timestamp,
+    
+    constraint fk_anexo_chamado
+		foreign key(chamado_id)
+        references chamados(id)
+);
+
+create table setores (
+	id int auto_increment primary key,
+    nome varchar(100) not null unique,
+    descricao text,
+    ativo boolean default true,
+    criado_em timestamp default current_timestamp
+);
+
+insert into setores (nome)
+values
+('TI'),
+('Finaceiro'),
+('RH'),
+('Administrativo'),
+('Recepção'),
+('Arquitetura'),
+('Portos'),
+('Pirólise'),
+('Laboratório Química');
+
+
+create index idx_usuario_email
+on usuarios(email);
+
+create index idx_chamado_status
+on chamados(status_chamado);
+
+create index idx_chamado_prioridade
+on chamados(prioridade);
+
+create index idx_chamado_usuario
+on chamados(usuario_id);
+
+create index idx_chamado_tecnico
+on chamados(tecnico_id);
+
+show tables;
+
+describe usuarios;
